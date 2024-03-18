@@ -15,7 +15,7 @@
 # $ export FLASK_APP=Season-2/Level-3/code.py && export FLASK_ENV=development && export FLASK_DEBUG=0 && flask run
 
 import os
-import re
+import bleach
 from flask import Flask, request, render_template
 app = Flask(__name__)
 
@@ -36,10 +36,10 @@ planet_data = {
 def index():
     if request.method == 'POST':
         planet = request.form.get('planet')
-        sanitized_planet = re.sub(r'[<>{}[\]]', '', planet if planet else '')
-
+        sanitized_planet = bleach.clean(planet)
+        
         if sanitized_planet:
-            if 'script' in sanitized_planet.lower() :
+            if 'script' in sanitized_planet.lower():
                 return '<h2>Blocked</h2></p>'
     
             return render_template('details.html', 
