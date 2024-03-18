@@ -2,10 +2,14 @@
 
 // This is the last level of this season, good luck!
 
-var CryptoAPI = (function() {
+var CryptoAPI = (function () {
 	var encoding = {
-		a2b: function(a) { },
-		b2a: function(b) { }
+		a2b: function (a) {
+			return a.charCodeAt(0);
+		},
+		b2a: function (b) {
+			return String.fromCharCode(b);
+		}
 	};
 
 	var API = {
@@ -14,7 +18,7 @@ var CryptoAPI = (function() {
 			identifier: '2b0e03021a',
 			size: 20,
 			block: 64,
-			hash: function(s) {
+			hash: function (s) {
 				var len = (s += '\x80').length,
 					blocks = len >> 6,
 					chunk = len & 63,
@@ -23,7 +27,7 @@ var CryptoAPI = (function() {
 					j = 0,
 					H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
 					w = [];
-					
+
 				while (chunk++ != 56) {
 					s += "\x00";
 					if (chunk == 64) {
@@ -31,11 +35,11 @@ var CryptoAPI = (function() {
 						chunk = 0;
 					}
 				}
-				
+
 				for (s += "\x00\x00\x00\x00", chunk = 3, len = 8 * (len - 1); chunk >= 0; chunk--) {
 					s += encoding.b2a(len >> (8 * chunk) & 255);
 				}
-					
+
 				for (i = 0; i < s.length; i++) {
 					j = (j << 8) + encoding.a2b(s[i]);
 					if ((i & 3) == 3) {
@@ -44,13 +48,13 @@ var CryptoAPI = (function() {
 					}
 					if ((i & 63) == 63) CryptoAPI.sha1._round(H, w);
 				}
-				
+
 				for (i = 0; i < H.length; i++)
 					for (j = 3; j >= 0; j--)
 						res += encoding.b2a(H[i] >> (8 * j) & 255);
 				return res;
 			}, // End "hash"
-			_round: function(H, w) { }
+			_round: function (H, w) { }
 		} // End "sha1"
 	}; // End "API"
 
