@@ -27,7 +27,8 @@ def validorder(order: Order):
         else:
             return "Invalid item type: %s" % item.type
 
-    if net != 0:
+    # Check if the absolute difference between net and 0 is within a tolerance
+    if abs(net) > 0.001:  # Adjust tolerance as needed
         return "Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net)
     else:
         return "Order ID: %s - Full payment received!" % order.id
