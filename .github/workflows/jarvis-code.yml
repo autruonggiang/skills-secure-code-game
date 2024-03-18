@@ -25,9 +25,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
       - name: Check GitHub Status
-        # Secure code checking action or any other secure action should be used here instead
-        # Replace the below placeholder with the actual action you intend to use
-        uses: some/secure-action@version
+        uses: secure-checks/checker-action@v1
         with:
           who-to-greet: "Jarvis, obviously ..."
           get-token: "token-4db56ee8-dbec-46f3-96f5-32247695ab9b"
