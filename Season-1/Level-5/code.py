@@ -45,8 +45,8 @@ class MD5_hasher:
         return hashlib.md5(password.encode()).hexdigest()
 
     def password_verification(self, password, password_hash):
-        password = self.password_hash(password)
-        return secrets.compare_digest(password.encode(), password_hash.encode())
+        hashed_password = self.password_hash(password)
+        return secrets.compare_digest(hashed_password, password_hash)
 
 # a collection of sensitive secrets necessary for the software to operate
 PRIVATE_KEY = os.environ.get('PRIVATE_KEY')
