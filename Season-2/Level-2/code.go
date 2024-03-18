@@ -12,6 +12,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -32,6 +33,10 @@ func isValidEmail(email string) bool {
 		return false
 	}
 	return match
+}
+
+func comparePasswords(password1, password2 string) bool {
+	return subtle.ConstantTimeCompare([]byte(password1), []byte(password2)) == 1
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,23 +74,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if password == storedPassword {
+		if comparePasswords(password, storedPassword) {
 			log.Printf("User %q logged in successfully with a valid password %q", email, password)
 			w.WriteHeader(http.StatusOK)
 		} else {
-			http.Error(w, "Invalid Email or Password", http.StatusUnauthorized)
-		}
-
-	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-	}
-}
-
-func main() {
-	http.HandleFunc("/login", loginHandler)
-	log.Print("Server started. Listening on :8080")
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatalf("HTTP server ListenAndServe: %q", err)
-	}
-}
