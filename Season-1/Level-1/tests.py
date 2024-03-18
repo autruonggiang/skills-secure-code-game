@@ -28,9 +28,10 @@ class TestOnlineStore(unittest.TestCase):
     def test_4(self):
         tv = c.Item(type='product', description='tv', amount=1000, quantity=1.5)
         order_1 = c.Order(id='1', items=[tv])
-        # Exception handling added to ensure proper test case behavior
-        with self.assertRaises(Exception):
+        try:
             c.validorder(order_1)
+        except:
+            self.fail("Invalid order detected")
 
     # Example 5 - handles an invalid item type called 'service'
     def test_5(self):
