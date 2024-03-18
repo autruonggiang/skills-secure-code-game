@@ -28,7 +28,7 @@ class TaxPayer:
             pass
 
         # defends against path traversal attacks
-        if path.startswith('/') or path.startswith('..'):
+        if os.path.abspath(path) != os.path.realpath(path):
             return None
 
         # builds path
@@ -40,6 +40,7 @@ class TaxPayer:
 
         # assume that image is returned on screen after this
         return prof_picture_path
+
 
     # returns the path of an attached tax form that every user should submit
     def get_tax_form_attachment(self, path=None):
