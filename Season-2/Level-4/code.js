@@ -15,7 +15,7 @@ const libxmljs = require("libxmljs");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const { exec } = require("node:child_process");
+const { exec } = require("child_process"); // Corrected import
 const app = express();
 
 app.use(bodyParser.json());
@@ -64,27 +64,11 @@ app.post("/ufo", (req, res) => {
           }
         });
 
-      // Secret feature to allow an "admin" to execute commands
-      if (
-        xmlDoc.toString().includes('SYSTEM "') &&
-        xmlDoc.toString().includes(".admin")
-      ) {
-        extractedContent.forEach((command) => {
-          exec(command, (err, output) => {
-            if (err) {
-              console.error("could not execute command: ", err);
-              return;
-            }
-            console.log("Output: \n", output);
-            res.status(200).set("Content-Type", "text/plain").send(output);
-          });
-        });
-      } else {
-        res
-          .status(200)
-          .set("Content-Type", "text/plain")
-          .send(extractedContent.join(" "));
-      }
+      // Removed the vulnerable condition for executing commands
+      res
+        .status(200)
+        .set("Content-Type", "text/plain")
+        .send(extractedContent.join(" "));
     } catch (error) {
       console.error("XML parsing or validation error:", error.message);
       res.status(400).send("Invalid XML: " + error.message);
