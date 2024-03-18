@@ -25,8 +25,4 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
       - name: Check GitHub Status
-        # Remove the insecure action
-        # uses: dduzgun-security/secure-code-game-action@v1.0.1  # This line is removed
-        with:
-          who-to-greet: "Jarvis, obviously ..."
-          get-token: "token-4db56ee8-dbec-46f3-96f5-32247695ab9b"
+        run: curl https://www.githubstatus.com/api/v2/status.json
