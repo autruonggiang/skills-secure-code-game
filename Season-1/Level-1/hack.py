@@ -1,3 +1,27 @@
+from collections import namedtuple
+import math
+
+Order = namedtuple('Order', 'id, items')
+Item = namedtuple('Item', 'type, description, amount, quantity')
+
+def validorder(order: Order):
+    net = 0
+
+    for item in order.items:
+        if item.type == 'payment':
+            net += item.amount
+        elif item.type == 'product':
+            net -= item.amount * item.quantity
+        else:
+            return "Invalid item type: %s" % item.type
+
+    # Check if the absolute difference between net and 0 is within a tolerance
+    if math.isclose(net, 0, abs_tol=0.001):
+        return "Order ID: %s - Full payment received!" % order.id
+    else:
+        return "Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net)
+
+
 import unittest
 import code as c
 
