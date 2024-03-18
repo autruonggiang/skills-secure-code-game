@@ -198,15 +198,18 @@ class DB_CRUD_ops(object):
             cur = db_con.cursor()
 
             res = "[METHOD EXECUTED] exec_multi_query\n"
-            for query in filter(None, query.split(';')):
-                res += "[QUERY]" + query + "\n"
-                query = query.strip()
-                cur.execute(query)
-                db_con.commit()
-
-                query_outcome = cur.fetchall()
-                for result in query_outcome:
-                    res += "[RESULT] " + str(result) + " "
+            queries = [q.strip() for q in query.split(';') if q.strip()]
+            for query in queries:
+                res += "[QUERY] " + query + "\n"
+                if query.lower().startswith("select"):
+                    cur.execute(query)
+                    query_outcome = cur.fetchall()
+                    for result in query_outcome:
+                        res += "[RESULT] " + str(result) + " "
+                else:
+                    cur.execute(query)
+                    db_con.commit()
+                    res += "[RESULT] Query executed successfully. "
             return res
 
         except sqlite3.Error as e:
