@@ -52,7 +52,7 @@ app.post("/ufo", (req, res) => {
   } else if (contentType === "application/xml") {
     try {
       const xmlDoc = libxmljs.parseXml(req.body, {
-        replaceEntities: true,
+        replaceEntities: false,
         recover: true,
         nonet: false,
       });
