@@ -12,7 +12,7 @@
 const express = require("express");
 const he = require("he");
 const bodyParser = require("body-parser");
-const libxmljs = require("libxmljs");
+const sax = require("sax");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -52,24 +52,26 @@ app.post("/ufo", (req, res) => {
     res.status(200).json({ ufo: "Received JSON data from an unknown planet." });
   } else if (contentType === "application/xml") {
     try {
-      const xmlDoc = libxmljs.parseXml(req.body, {
-        replaceEntities: false,
-        recover: true,
-        nonet: false,
-      });
-
-      console.log("Received XML data from XMLon:", xmlDoc.toString());
-
+      const parser = sax.parser(true);
       const extractedContent = [];
 
-      xmlDoc
-        .root()
-        .childNodes()
-        .forEach((node) => {
-          if (node.type() === "element") {
-            extractedContent.push(node.text());
-          }
-        });
+      parser.onopentag = (node) => {
+        if (node.isSelfClosing) {
+          extractedContent.push(node.name);
+        }
+      };
+
+      parser.ontext = (text) => {
+        extractedContent.push(text);
+      };
+
+      parser.onerror = (error) => {
+        throw new Error("Invalid XML: " + error.message);
+      };
+
+      parser.write(req.body).close();
+
+      console.log("Received XML data from XMLon:", extractedContent.join(" "));
 
       // Removed the vulnerable condition for executing commands
       res
