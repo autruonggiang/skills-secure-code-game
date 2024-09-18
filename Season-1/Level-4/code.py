@@ -202,12 +202,12 @@ class DB_CRUD_ops(object):
             for query in queries:
                 res += "[QUERY] " + query + "\n"
                 if query.lower().startswith("select"):
-                    cur.execute(query)
+                    cur.execute("SELECT * FROM stocks WHERE symbol = ?", (query,))
                     query_outcome = cur.fetchall()
                     for result in query_outcome:
                         res += "[RESULT] " + str(result) + " "
                 else:
-                    cur.execute(query)
+                    cur.execute("INSERT INTO stocks (symbol) VALUES (?)", (query,))
                     db_con.commit()
                     res += "[RESULT] Query executed successfully. "
             return res
@@ -233,16 +233,18 @@ class DB_CRUD_ops(object):
 
             res = "[METHOD EXECUTED] exec_user_script\n"
             res += "[QUERY] " + query + "\n"
-            if ';' in query:
-                res += "[SCRIPT EXECUTION]"
-                cur.executescript(query)
-                db_con.commit()
-            else:
-                cur.execute(query)
-                db_con.commit()
-                query_outcome = cur.fetchall()
-                for result in query_outcome:
-                    res += "[RESULT] " + str(result)
+            queries = [q.strip() for q in query.split(';') if q.strip()]
+            for q in queries:
+                res += "[QUERY] " + q + "\n"
+                if q.lower().startswith("select"):
+                    cur.execute("SELECT * FROM stocks WHERE symbol = ?", (q,))
+                    query_outcome = cur.fetchall()
+                    for result in query_outcome:
+                        res += "[RESULT] " + str(result) + " "
+                else:
+                    cur.execute("INSERT INTO stocks (symbol) VALUES (?)", (q,))
+                    db_con.commit()
+                    res += "[RESULT] Query executed successfully. "
             return res
 
         except sqlite3.Error as e:
