@@ -7,7 +7,7 @@ import random
 import secrets
 import hashlib
 import os
-import bcrypt
+from argon2 import PasswordHasher
 
 class Random_generator:
 
@@ -24,35 +24,29 @@ class Random_generator:
         salt = ''.join(str(random.randint(0, 9)) for _ in range(21)) + '.'
         return f'$2b${rounds}${salt}'.encode()
 
-class SHA256_hasher:
+from argon2 import PasswordHasher
 
-    # produces the password hash by combining password + salt because hashing
-    def password_hash(self, password, salt):
-        password = binascii.hexlify(hashlib.sha256(password.encode()).digest())
-        password_hash = bcrypt.hashpw(password, salt)
-        return password_hash.decode('ascii')
+class Argon2_hasher:
 
-    # verifies that the hashed password reverses to the plain text version on verification
-    def password_verification(self, password, password_hash):
-        password = binascii.hexlify(hashlib.sha256(password.encode()).digest())
-        password_hash = password_hash.encode('ascii')
-        return bcrypt.checkpw(password, password_hash)
+    def __init__(self):
+        self.ph = PasswordHasher()
 
-class MD5_hasher:
-
-    # same as above but using a different algorithm to hash which is MD5
+    # produces the password hash using argon2
     def password_hash(self, password):
-        return hashlib.md5(password.encode()).hexdigest()
+        return self.ph.hash(password)
 
+    # verifies that the hashed password matches the plain text version
     def password_verification(self, password, password_hash):
-        hashed_password = self.password_hash(password)
-        return secrets.compare_digest(hashed_password, password_hash)
+        try:
+            return self.ph.verify(password_hash, password)
+        except:
+            return False
 
 # a collection of sensitive secrets necessary for the software to operate
 PRIVATE_KEY = os.environ.get('PRIVATE_KEY')
 PUBLIC_KEY = os.environ.get('PUBLIC_KEY')
 SECRET_KEY = 'TjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8'
-PASSWORD_HASHER = 'MD5_hasher'
+PASSWORD_HASHER = 'Argon2_hasher'
 
 
 # Contribute new levels to the game in 3 simple steps!
