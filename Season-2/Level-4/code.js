@@ -10,6 +10,7 @@
 // 6. Compare your solution with solution.js
 
 const express = require("express");
+const he = require("he");
 const bodyParser = require("body-parser");
 const libxmljs = require("libxmljs");
 const multer = require("multer");
@@ -77,7 +78,7 @@ app.post("/ufo", (req, res) => {
         .send(extractedContent.join(" "));
     } catch (error) {
       console.error("XML parsing or validation error:", error.message);
-      res.status(400).send("Invalid XML: " + error.message);
+      res.status(400).send("Invalid XML: " + he.encode(error.message));
     }
   } else {
     res.status(405).send("Unsupported content type");
