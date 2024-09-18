@@ -3,7 +3,7 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const libxmljs = require("libxmljs");
+const sax = require("sax");
 const multer = require("multer");
 const app = express();
 
@@ -29,37 +29,37 @@ app.post("/ufo", (req, res) => {
     res.status(200).json({ ufo: "Received JSON data from an unknown planet." });
   } else if (contentType === "application/xml") {
     try {
-      const xmlDoc = libxmljs.parseXml(req.body, {
-        replaceEntities: false, // Disabled the option to replace XML entities
-        recover: false, // Disabled the parser to recover from certain parsing errors
-        nonet: true, // Disabled network access when parsing
-      });
-
-      console.log("Received XML data from XMLon:", xmlDoc.toString());
-
+      const parser = sax.parser(true);
       const extractedContent = [];
 
-      xmlDoc
-        .root()
-        .childNodes()
-        .forEach((node) => {
-          if (node.type() === "element") {
-            extractedContent.push(node.text());
-          }
-        });
+      parser.onopentag = (node) => {
+        if (node.isSelfClosing) {
+          extractedContent.push(node.name);
+        }
+      };
 
-      if (
-        xmlDoc.toString().includes('SYSTEM "') &&
-        xmlDoc.toString().includes(".admin")
-      ) {
-        // Removed the code to execute commands within the .admin file on the server
-        res.status(400).send("Invalid XML");         
-      } else {
-        res
-          .status(200)
-          .set("Content-Type", "text/plain")
-          .send(extractedContent.join(" "));
-      }
+      parser.ontext = (text) => {
+        extractedContent.push(text);
+      };
+
+      parser.onerror = (error) => {
+        console.error("XML parsing error:", error);
+        res.status(400).send("Invalid XML");
+      };
+
+      parser.onend = () => {
+        const xmlString = extractedContent.join(" ");
+        if (xmlString.includes('SYSTEM "') && xmlString.includes(".admin")) {
+          res.status(400).send("Invalid XML");
+        } else {
+          res
+            .status(200)
+            .set("Content-Type", "text/plain")
+            .send(xmlString);
+        }
+      };
+
+      parser.write(req.body).close();
     } catch (error) {
       console.error("XML parsing or validation error");
       res.status(400).send("Invalid XML");
