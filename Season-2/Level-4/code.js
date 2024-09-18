@@ -38,7 +38,11 @@ app.post("/ufo/upload", uploadLimiter, upload.single("file"), (req, res) => {
 
   console.log("Received uploaded file:", req.file.originalname);
 
-  const uploadedFilePath = path.join(__dirname, req.file.originalname);
+  const SAFE_ROOT = path.resolve(__dirname, 'uploads');
+  const uploadedFilePath = path.resolve(SAFE_ROOT, req.file.originalname);
+  if (!uploadedFilePath.startsWith(SAFE_ROOT)) {
+    return res.status(400).send("Invalid file path.");
+  }
   fs.writeFileSync(uploadedFilePath, req.file.buffer);
 
   res.status(200).send("File uploaded successfully.");
