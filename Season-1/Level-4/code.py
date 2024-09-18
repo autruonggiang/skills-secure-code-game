@@ -233,16 +233,18 @@ class DB_CRUD_ops(object):
 
             res = "[METHOD EXECUTED] exec_user_script\n"
             res += "[QUERY] " + query + "\n"
-            if ';' in query:
-                res += "[SCRIPT EXECUTION]"
-                cur.executescript(query)
-                db_con.commit()
-            else:
-                cur.execute(query)
-                db_con.commit()
-                query_outcome = cur.fetchall()
-                for result in query_outcome:
-                    res += "[RESULT] " + str(result)
+            queries = [q.strip() for q in query.split(';') if q.strip()]
+            for q in queries:
+                res += "[QUERY] " + q + "\n"
+                if q.lower().startswith("select"):
+                    cur.execute(q)
+                    query_outcome = cur.fetchall()
+                    for result in query_outcome:
+                        res += "[RESULT] " + str(result) + " "
+                else:
+                    cur.execute(q)
+                    db_con.commit()
+                    res += "[RESULT] Query executed successfully. "
             return res
 
         except sqlite3.Error as e:
