@@ -27,13 +27,11 @@ class TaxPayer:
         if not path:
             pass
 
-        # defends against path traversal attacks
-        if os.path.abspath(path) != os.path.realpath(path):
-            return None
-
-        # builds path
+        # Validate the path to prevent path traversal attacks
         base_dir = os.path.dirname(os.path.abspath(__file__))
         prof_picture_path = os.path.normpath(os.path.join(base_dir, path))
+        if not prof_picture_path.startswith(base_dir):
+            raise Exception("Invalid path")
 
         with open(prof_picture_path, 'rb') as pic:
             picture = bytearray(pic.read())
